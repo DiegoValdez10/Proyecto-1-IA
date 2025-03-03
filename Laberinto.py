@@ -1,3 +1,5 @@
+import random
+import copy
 
 class Laberinto:
     def __init__(self, ruta_archivo):
@@ -10,6 +12,7 @@ class Laberinto:
         with open(ruta_archivo, 'r') as archivo:
             lineas = archivo.readlines()
         
+        self.matriz = [] 
         for i, linea in enumerate(lineas):
             fila = []
             valores = linea.strip().split(',')
@@ -42,3 +45,27 @@ class Laberinto:
                 vecinos.append(nueva_posicion)
         
         return vecinos
+    
+    def generar_laberinto_aleatorio(self, ruta_salida):
+
+        matriz_nueva = copy.deepcopy(self.matriz)
+        posiciones_validas = []
+        for i in range(len(matriz_nueva)):
+            for j in range(len(matriz_nueva[0])):
+                if matriz_nueva[i][j] == '0':
+                    posiciones_validas.append((i, j))
+        fila_salida, col_salida = self.salida
+        matriz_nueva[fila_salida][col_salida] = '0'
+        if posiciones_validas:
+            nueva_salida = random.choice(posiciones_validas)
+            fila_nueva, col_nueva = nueva_salida
+            matriz_nueva[fila_nueva][col_nueva] = '3'
+        else:
+            matriz_nueva[fila_salida][col_salida] = '3'
+            nueva_salida = (fila_salida, col_salida)
+
+        with open(ruta_salida, 'w') as archivo:
+            for fila in matriz_nueva:
+                archivo.write(','.join(fila) + '\n')
+        
+        return nueva_salida

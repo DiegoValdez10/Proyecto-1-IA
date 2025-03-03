@@ -66,14 +66,6 @@ def main():
     ejecutar_algoritmos(laberinto2)
     print("\n--- Laberinto 3 ---")
     ejecutar_algoritmos(laberinto3)
-    
-    # Simulación con puntos aleatorios
-   #print("\n\n--- Simulación con Puntos Aleatorios ---")
-    #puntos_inicio = generar_puntos_aleatorios(laberinto1, 5)
-    
-    #for i, inicio in enumerate(puntos_inicio):
-        #print(f"\n\n=== Punto de inicio aleatorio #{i+1}: {inicio} ===")
-        #ejecutar_algoritmos(laberinto1, inicio)
 
 if __name__ == "__main__":
     main()

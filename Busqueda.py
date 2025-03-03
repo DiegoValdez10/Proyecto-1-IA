@@ -1,13 +1,9 @@
-# Busqueda.py
 import time
 from Cola import ColaFIFO, ColaLIFO, ColaPrioridad
 from Nodo import Nodo
 from Heuristica import distancia_euclidiana, distancia_manhattan
 
 def busqueda_amplitud(laberinto, inicio=None, objetivo=None):
-    """
-    Implementación del algoritmo de búsqueda en amplitud (BFS).
-    """
     inicio = inicio or laberinto.inicio
     objetivo = objetivo or laberinto.salida
     
@@ -29,7 +25,7 @@ def busqueda_amplitud(laberinto, inicio=None, objetivo=None):
                 "camino": camino,
                 "nodos_visitados": nodos_visitados,
                 "tiempo": tiempo_fin - tiempo_inicio,
-                "largo_camino": len(camino) - 1  # Restamos 1 porque el nodo inicial no tiene acción
+                "largo_camino": len(camino) - 1  
             }
         
         if nodo.estado not in explorados:
@@ -54,9 +50,7 @@ def busqueda_amplitud(laberinto, inicio=None, objetivo=None):
     }
 
 def busqueda_profundidad(laberinto, inicio=None, objetivo=None):
-    """
-    Implementación del algoritmo de búsqueda en profundidad (DFS).
-    """
+
     inicio = inicio or laberinto.inicio
     objetivo = objetivo or laberinto.salida
     
@@ -78,7 +72,7 @@ def busqueda_profundidad(laberinto, inicio=None, objetivo=None):
                 "camino": camino,
                 "nodos_visitados": nodos_visitados,
                 "tiempo": tiempo_fin - tiempo_inicio,
-                "largo_camino": len(camino) - 1  # Restamos 1 porque el nodo inicial no tiene acción
+                "largo_camino": len(camino) - 1  
             }
         
         if nodo.estado not in explorados:
@@ -103,9 +97,7 @@ def busqueda_profundidad(laberinto, inicio=None, objetivo=None):
     }
 
 def busqueda_voraz(laberinto, heuristica=distancia_euclidiana, inicio=None, objetivo=None):
-    """
-    Implementación del algoritmo de búsqueda voraz (Greedy First Search).
-    """
+ 
     inicio = inicio or laberinto.inicio
     objetivo = objetivo or laberinto.salida
     
@@ -128,7 +120,7 @@ def busqueda_voraz(laberinto, heuristica=distancia_euclidiana, inicio=None, obje
                 "camino": camino,
                 "nodos_visitados": nodos_visitados,
                 "tiempo": tiempo_fin - tiempo_inicio,
-                "largo_camino": len(camino) - 1  # Restamos 1 porque el nodo inicial no tiene acción
+                "largo_camino": len(camino) - 1  
             }
         
         if nodo.estado not in explorados:
@@ -153,50 +145,80 @@ def busqueda_voraz(laberinto, heuristica=distancia_euclidiana, inicio=None, obje
     }
 
 def busqueda_a_estrella(laberinto, heuristica=distancia_euclidiana, inicio=None, objetivo=None):
-    """
-    Implementación del algoritmo de búsqueda A*.
-    """
+
     inicio = inicio or laberinto.inicio
     objetivo = objetivo or laberinto.salida
     
     tiempo_inicio = time.time()
-    
+
     frontera = ColaPrioridad()
     nodo_inicial = Nodo(inicio)
-    frontera.add(nodo_inicial, heuristica(inicio, objetivo))
+
+    frontera.add(nodo_inicial, 0 + heuristica(inicio, objetivo))
+    
+
     explorados = {}
+    
+
+    nodos_frontera = {inicio: nodo_inicial}
+    
     nodos_visitados = 0
     
     while not frontera.empty():
+
         nodo = frontera.pop()
+        estado_actual = nodo.estado
         nodos_visitados += 1
         
-        if nodo.estado == objetivo:
+
+        if estado_actual in explorados and explorados[estado_actual] < nodo.costo_camino:
+            continue
+            
+
+        if estado_actual == objetivo:
             tiempo_fin = time.time()
             camino = nodo.obtener_camino()
             return {
                 "camino": camino,
                 "nodos_visitados": nodos_visitados,
                 "tiempo": tiempo_fin - tiempo_inicio,
-                "largo_camino": len(camino) - 1  # Restamos 1 porque el nodo inicial no tiene acción
+                "largo_camino": len(camino) - 1
             }
+
+        explorados[estado_actual] = nodo.costo_camino
+
+        if estado_actual in nodos_frontera:
+            del nodos_frontera[estado_actual]
         
-        explorados[nodo.estado] = nodo.costo_camino
-        
-        for vecino in laberinto.obtener_vecinos(nodo.estado):
+
+        for vecino in laberinto.obtener_vecinos(estado_actual):
             nuevo_costo = nodo.costo_camino + 1
             
-            if vecino not in explorados or nuevo_costo < explorados[vecino]:
-                explorados[vecino] = nuevo_costo
-                direccion = obtener_direccion(nodo.estado, vecino)
-                nuevo_nodo = Nodo(
-                    estado=vecino,
-                    padre=nodo,
-                    accion=direccion,
-                    costo_camino=nuevo_costo
-                )
-                frontera.add(nuevo_nodo, nuevo_costo + heuristica(vecino, objetivo))
+
+            if vecino in explorados and explorados[vecino] <= nuevo_costo:
+                continue
+                
+
+            if vecino in nodos_frontera and nodos_frontera[vecino].costo_camino <= nuevo_costo:
+                continue
+                
+
+            direccion = obtener_direccion(estado_actual, vecino)
+            nuevo_nodo = Nodo(
+                estado=vecino,
+                padre=nodo,
+                accion=direccion,
+                costo_camino=nuevo_costo
+            )
+            
+
+            f_n = nuevo_costo + heuristica(vecino, objetivo)
+            
+
+            frontera.add(nuevo_nodo, f_n)
+            nodos_frontera[vecino] = nuevo_nodo
     
+
     tiempo_fin = time.time()
     return {
         "camino": None,
@@ -206,9 +228,7 @@ def busqueda_a_estrella(laberinto, heuristica=distancia_euclidiana, inicio=None,
     }
 
 def obtener_direccion(origen, destino):
-    """
-    Determina la dirección del movimiento basada en las coordenadas de origen y destino.
-    """
+
     fila_origen, col_origen = origen
     fila_destino, col_destino = destino
     
